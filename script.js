@@ -1,132 +1,110 @@
-const operacaoEnum = ({
-    Divisao: '/',
-    Multiplicacao: '*',
-    Adicao: '+',
-    Subtracao: '-'
-  });
-  const operacoes = ['+', '-', '*', '/'];
-  class Calculadora {
-    constructor() {
-      this._valorA = ''
-      this._valorB = ''
-      this._operacao = ''
-      this._resultado = '0.0'
-      this._display = ''
-  
-    }
-    getValorA() {
-      return this._valorA;
-    }
-  
-    getValorB() {
-      return this._valorB;
-    }
-  
-    getOperacao() {
-      return this._operacao;
-    }
-  
-    getResultado() {
-      return this._resultado;
-    }
-  
-    getDisplay() {
-      return this._display;
-    }
-  
-    setValorA(valor) {
-      this._valorA += valor
-    }
-  
-    setValorB(valor) {
-      this._valorB += valor
-    }
-  
-    setOperacao(operacao) {
-      this._operacao = operacao
-    }
-  
-    setResultado(resultado) {
-      this._resultado = resultado;
-    }
-  
-    setDisplay(valor) {
-      this._display = valor
-    }
-  
-  
-    adicionarDigito(valor) {
-      if (operacoes.includes(valor)) {
-        this.setOperacao(valor)
-        this.setDisplay(this.getValorA() + ' ' + this.getOperacao() + ' ')
-      } else if (this.getValorB() == '' && this.getOperacao() == '') {
-        this.setValorA(valor)
-        this.setDisplay(this.getDisplay() + valor)
-      } else {
-        this.setValorB(valor)
-        this.setDisplay(this.getDisplay() + valor)
+const operacaoEnum = {
+  Divisao: '/',
+  Multiplicacao: '*',
+  Adicao: '+',
+  Subtracao: '-',
+};
+
+const operacoes = ['+', '-', '*', '/'];
+
+class Calculadora {
+  constructor() {
+    this._expressao = [];
+    this._resultado = '0.0';
+    this._display = '';
+  }
+
+  getResultado() {
+    return this._resultado;
+  }
+
+  getDisplay() {
+    return this._display;
+  }
+
+  setResultado(resultado) {
+    this._resultado = resultado;
+  }
+
+  setDisplay(valor) {
+    this._display = valor;
+  }
+  adicionarDigito(valor) {
+    if (valor === '=') {
+      this.calcularExpressao();
+    } else if (operacoes.includes(valor)) {
+      if (this._expressao.length === 0) {
+        return; 
       }
-    }
   
-    limparDisplay() {
-      this._valorA = ''
-      this._valorB = ''
-      this._operacao = ''
-      this._display = ''
+      // Verifique se o último elemento da expressão é um operador
+      const ultimoElemento = this._expressao[this._expressao.length - 1];
+      if (operacoes.includes(ultimoElemento)) {
+        
+        return;
+      } else {
+        
+        this._expressao.push(valor);
+        this.setDisplay(this.getDisplay() + ' ' + valor + ' ');
+      }
+    } else {
+      this._expressao.push(valor);
+      this.setDisplay(this.getDisplay() + valor);
     }
-  
-    calcular() {
-      let calculo = '';
-      console.log(this._valorA, this._operacao, this._valorB)
-      const valorA = parseFloat(this._valorA.replace(',', '.'));
-      const valorB = parseFloat(this._valorB.replace(',', '.'));
-      
-      if (this._operacao === operacaoEnum.Adicao) {
-        calculo = valorA + valorB;
-      } else if (this._operacao === operacaoEnum.Multiplicacao) {
-        calculo = valorA * valorB;
-      } else if (this._operacao === operacaoEnum.Subtracao) {
-        calculo = valorA - valorB;
-      } else if (this._operacao === operacaoEnum.Divisao) {
-        if (valorB === 0) {
+    console.log(this._expressao)
+  }
+
+
+  limparDisplay() {
+    this._expressao = [];
+    this._display = '';
+  }
+
+  calcularExpressao() {
+    try {
+      const result = eval(this._expressao.join(''));
+      if (!isNaN(result)) {
+        if (result === Infinity || result === -Infinity) {
           this.setResultado('Não é possível dividir por zero.');
           this.setDisplay(this.getResultado());
-          return;
+          this._expressao = [];
         } else {
-          calculo = valorA / valorB;
+          this.setResultado(result.toString().replace('.', ','));
+          this.setDisplay(this.getResultado());
+          this._expressao = [this.getResultado()];
+          console.log(`Resultado da operação: ${this.getResultado()}`);
         }
       } else {
-        this.setResultado('Faça uma operação válida');
+        this.setResultado('Erro');
         this.setDisplay(this.getResultado());
-        return
+        this._expressao = [];
+        console.log('Erro ao calcular a expressão');
       }
-  
-      this.setResultado(calculo.toString().replace('.', ','))
+    } catch (error) {
+      this.setResultado('Erro');
       this.setDisplay(this.getResultado());
+      this._expressao = [];
+      console.log('Erro ao calcular a expressão');
     }
   }
-  
-  const calculadora = new Calculadora();
-  
-  
-  atribuirValor = (valor) => {
-    calculadora.adicionarDigito(valor);
-    atualizarDisplay();
-  
-  }
-  
-  calcular = () => {
-    calculadora.calcular();
-    atualizarDisplay();
-    calculadora.limparDisplay()
-  }
-  
-  atualizarDisplay = () => {
-    document.getElementById('display').value = calculadora.getDisplay();
-  }
-  
-  limparDisplay = () => {
-    calculadora.limparDisplay();
-    atualizarDisplay();
-  }
-  
+}
+
+const calculadora = new Calculadora();
+
+atribuirValor = (valor) => {
+  calculadora.adicionarDigito(valor);
+  atualizarDisplay();
+};
+
+
+
+atualizarDisplay = () => {
+  document.getElementById('display').value = calculadora.getDisplay();
+};
+
+limparDisplay = () => {
+  calculadora.limparDisplay();
+  atualizarDisplay();
+};
+
+
